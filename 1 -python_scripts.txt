@@ -1,0 +1,113 @@
+import json
+import boto3
+
+def initialize_bedrock_client():
+    return boto3.client('bedrock-runtime')
+
+def invoke_bedrock_model(client, user_prompt):
+    """
+    Invokes the AWS Bedrock Model ith the given Input.
+    Paramters:
+      client: Initialized the Bedrock Client.
+      user_prompt: The prompt to send to the model.
+    
+    Returns:
+      The response from the model as a string
+
+    """
+    response = client.invoke_model(
+        modelId="anthropic.claude-instant-v1",
+        contentType="application/json",
+        accept="*/*",
+        body=json.dumps({
+            "prompt": f"\n\nHuman: {user_prompt}\n\nAssistant:",
+            "max_tokens_to_sample": 600,
+            "temperature": 1,
+            "top_p": 1,
+            "top_k": 250,
+            "stop_sequences": ["\n\nHuman:"],
+            "anthropic_version": "bedrock-2023-05-31"
+        })
+    )
+    raw_body = response['body'].read()
+    #print(raw_body)
+
+    response_body = json.loads(raw_body)
+    #print(response_body)
+
+    return response_body.get('completion', 'No response received.')
+
+    
+	================
+	================
+
+
+from aws_bedrock import initialize_bedrock_client, invoke_bedrock_model
+
+# Step 1: Initialize the AWS Bedrock client
+print("Initializing Bedrock client...")
+client = initialize_bedrock_client()
+print("Bedrock client initialized successfully.")
+
+# Step 2: Get user input manually
+user_prompt = input("Enter your prompt for the Bedrock model: ")
+
+# Step 3: Invoke the Bedrock model
+print("Sending the prompt to Bedrock model...")
+response = invoke_bedrock_model(client, user_prompt)
+print("Response received.")
+
+# Step 4: Display the model's response
+print(f"Model's response: {response}")
+
+
+===========
+	
+	from aws_bedrock import initialize_bedrock_client, invoke_bedrock_model
+
+# Step 1: Initialize the AWS Bedrock client
+print("Initializing Bedrock client...")
+client = initialize_bedrock_client()
+print("Bedrock client initialized successfully.")
+
+# Step 2: Run the chatbot in a loop
+while True:
+    # Get user input manually
+    user_prompt = input("Enter your prompt for the Bedrock model (or type 'exit' to quit): ")
+    
+    # Check if the user wants to exit
+    if user_prompt.lower() == 'exit':
+        print("Exiting chatbot.")
+        break
+
+    # Step 3: Invoke the Bedrock model
+    print("Sending the prompt to Bedrock model...")
+    response = invoke_bedrock_model(client, user_prompt)
+    print("Response received.")
+
+    # Step 4: Display the model's response
+    print(f"Model's response: {response}")
+	
+	
+	===========
+	===========
+	
+	{
+    'ResponseMetadata': {
+        'RequestId': '854963f6-e006-487e-b63d-858911e978bf',
+        'HTTPStatusCode': 200,
+        'HTTPHeaders': {
+            'date': 'Thu, 28 Nov 2024 10:58:28 GMT',
+            'content-type': 'application/json',
+            'content-length': '244',
+            'connection': 'keep-alive',
+            'x-amzn-requestid': '854963f6-e006-487e-b63d-858911e978bf',
+            'x-amzn-bedrock-invocation-latency': '789',
+            'x-amzn-bedrock-output-token-count': '35',
+            'x-amzn-bedrock-input-token-count': '14'
+        },
+        'RetryAttempts': 0
+    },
+    'contentType': 'application/json',
+    'body': <botocore.response.StreamingBody object at 0x00000298A673D540>
+}
